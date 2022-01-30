@@ -122,7 +122,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        //todo: minimize app
+        //todo: minimize app kek
         return false;
       },
       child: NavigationBase(
