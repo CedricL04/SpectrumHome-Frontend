@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:spectrum_home2/dataObjects/device.dart';
 import 'package:spectrum_home2/dataObjects/room.dart';
 import 'package:spectrum_home2/panels/panel_device.dart';
 import 'package:spectrum_home2/main.dart' as theme;
 import 'package:spectrum_home2/panels/panel_scene.dart';
 import 'package:spectrum_home2/settings/settings_button.dart';
+import 'package:spectrum_home2/utils/data/fill_data.dart';
+import 'package:spectrum_home2/utils/utils.dart';
 import 'package:spectrum_home2/utils/widgets/panel_layout.dart';
+import 'package:spectrum_home2/utils/widgets/request_handler.dart';
 
 class HomePage extends StatefulWidget {
   final bool small;
@@ -57,7 +61,32 @@ class _HomePageState extends State<HomePage> {
                       base: true,
                       panelHero: false,
                     )),
-            "Snapshots": List.generate(10, (index) => ScenePanel())
+            "Snapshots": RequestHandler(
+              builder: (context, data) {
+                if (data.isEmpty) {
+                  return Container();
+                }
+
+                List<Widget> widgets = (data["scenes"] as List).map((scene) {
+                  FillData fill = FillData((scene["colors"] as List)
+                      .map((s) => Utils.stringToColor(s))
+                      .toList());
+
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ScenePanel(fill: fill, sceneName: scene["name"],),
+                  );
+                }).toList();
+
+                return Wrap(children: widgets);
+              },
+              id: "scene:${widget.room.name}${theme.server.user}",
+              request: {
+                "type": "scene",
+                "action": "get",
+                "values": {"room": widget.room.name, "simple": true}
+              },
+            )
           }),
           Positioned(
             child: Column(

@@ -3,9 +3,10 @@ import 'dart:convert';
 
 import 'package:spectrum_home2/dataObjects/device.dart';
 import 'package:spectrum_home2/dataObjects/room.dart';
+import 'package:spectrum_home2/utils/utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:spectrum_home2/main.dart' as theme;
-import 'package:spectrum_home2/utils/utils.dart';
+import 'package:spectrum_home2/utils/widgets/request_handler.dart' as req;
 
 class Server {
   List<Room> rooms = [];
@@ -81,7 +82,7 @@ class Server {
     return 'http://$ip:6917/package';
   }
 
-  Future<Map<String, dynamic>?> sendRequest(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> sendRequest(Map<String, dynamic> data) async {
     data["user"] = user.name;
     var body = jsonEncode(data);
     var request = await http.post(Uri.parse(_getURL()), body: body);
@@ -116,8 +117,8 @@ class Server {
       "action": "load",
       "values": {"public": public, "path": ""}
     }));
-    if (data?["error"] ?? false) return {};
-    return data?["data"] ?? {};
+    if (data["error"]) return {};
+    return data["data"];
   }
 
   Future syncedUpdate(dynamic data, String path, {bool public = false}) async {
@@ -131,6 +132,7 @@ class Server {
 
   void _clearData() {
     rooms.clear();
+    req.cache.clear();
   }
 }
 
@@ -145,6 +147,6 @@ class User {
       "action": "verify",
       "values": {"name": this.name}
     }));
-    return data?["verified"] ?? false;
+    return data["verified"];
   }
 }

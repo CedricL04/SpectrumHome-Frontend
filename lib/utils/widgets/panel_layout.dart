@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spectrum_home2/main.dart' as theme;
 
 class PanelLayout extends StatelessWidget {
-  final Map<String, List<Widget>> data;
+  final Map<String, dynamic> data;
   const PanelLayout({required this.data, Key? key}) : super(key: key);
 
   @override
@@ -29,14 +29,19 @@ class PanelLayout extends StatelessWidget {
           style: theme.h2,
         ),
       ));
-      children.add(Wrap(
-        children: data[title]!
-            .map((e) => Padding(
-                  child: e,
-                  padding: EdgeInsets.all(8),
-                ))
-            .toList(),
-      ));
+      dynamic w = data[title]!;
+      if (w is List) {
+        children.add(Wrap(
+          children: w
+              .map((e) => Padding(
+                    child: e,
+                    padding: EdgeInsets.all(8),
+                  ))
+              .toList(),
+        ));
+      } else if (w is Widget) {
+        children.add(w);
+      }
     }
 
     return Column(
@@ -56,13 +61,18 @@ class PanelLayout extends StatelessWidget {
           style: theme.h2,
         ),
       ));
-      children.addAll(data[title]!
-          .map((e) => Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: e,
-              ))
-          .toList());
+      dynamic w = data[title]!;
+      if (w is List) {
+        children.addAll((data[title]! as List)
+            .map((e) => Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: e,
+                ))
+            .toList());
+      } else if (w is Widget) {
+        children.add(w);
+      }
     }
 
     return Column(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:spectrum_home2/dataObjects/device.dart';
 import 'package:spectrum_home2/dataObjects/room.dart';
-import 'package:spectrum_home2/dialogs/bouncy_gesture_detector.dart';
 import 'package:spectrum_home2/panels/panel_scene.dart';
 import 'package:spectrum_home2/utils/utils.dart';
 import 'package:spectrum_home2/utils/widgets/panel_layout.dart';
@@ -74,11 +73,11 @@ class _ScenePageState extends State<ScenePage> {
               );
             }),
           ),
-          Expanded(
-            child: PanelLayout(data: {
-              "Snapshots": List.generate(10, (index) => ScenePanel())
-            }),
-          ),
+          // Expanded(
+          //   child: PanelLayout(data: {
+          //     "Snapshots": List.generate(10, (index) => ScenePanel([Colors.red]))
+          //   }),
+          // ),
         ],
       ),
     );

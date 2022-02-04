@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:spectrum_home2/dialogs/bouncy_gesture_detector.dart';
-import 'package:spectrum_home2/main.dart';
 import 'package:spectrum_home2/panels/panel_base.dart';
+import 'package:spectrum_home2/utils/data/fill_data.dart';
 import 'package:spectrum_home2/utils/utils.dart';
+import 'package:spectrum_home2/main.dart' as theme;
 
 class ScenePanel extends StatelessWidget {
-  const ScenePanel({Key? key}) : super(key: key);
+  const ScenePanel({required this.fill, required this.sceneName, Key? key})
+      : super(key: key);
+
+  final FillData fill;
+  final String sceneName;
 
   @override
   Widget build(BuildContext context) {
-    List<Color> colors = server.rooms[0].devices
-        .map((d) => Utils.adjustColor(d.fill.avgColor))
-        .toList();
+    List<Color> colors = fill.colors;
 
     return BouncyGestureDetector(
+      onTap: () async {
+        Map json = await theme.server.sendRequest({
+          "type": "scene",
+          "action": "apply",
+          "values": {"name": sceneName}
+        });
+        print(json.toString());
+      },
       child: Panel(
           smallPanel: true,
           child: Padding(
