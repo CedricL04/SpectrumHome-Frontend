@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:spectrum_home2/dataObjects/device.dart';
 import 'package:spectrum_home2/dialogs/bouncy_gesture_detector.dart';
 import 'package:spectrum_home2/main.dart' as theme;
 
 class NotConnectedPanel extends StatelessWidget {
   final void Function() onTap;
+  final Device device;
 
-  const NotConnectedPanel({required this.onTap, Key? key}) : super(key: key);
+  const NotConnectedPanel({required this.onTap, required this.device, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +17,8 @@ class NotConnectedPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "Disconnected",
-            style: theme.h4,
+            device.name,
+            style: theme.h3,
           ),
           SizedBox(
             height: 10,

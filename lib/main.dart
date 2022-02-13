@@ -127,9 +127,15 @@ class _MainScreenState extends State<MainScreen> {
       },
       child: NavigationBase(
         pages: [
-          NavigationEntry("Rooms", Icons.home_outlined, RoomPage()),
-          NavigationEntry("Dashboard", Icons.dashboard_outlined, Container()),
-          NavigationEntry("Settings", Icons.settings_outlined, Container())
+          NavigationEntry(
+              "Rooms", Icons.home_outlined, (contet, init) => RoomPage()),
+          NavigationEntry("Dashboard", Icons.dashboard_outlined,
+              (contet, init) => Container()),
+          NavigationEntry(
+            "Settings",
+            Icons.settings_outlined,
+            (contet, init) => Container(),
+          )
         ],
         backAction: () =>
             Navigator.pushReplacement(context, new HeroDialogRoute(

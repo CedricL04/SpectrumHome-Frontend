@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:spectrum_home2/controlWidgets/swtch.dart';
@@ -32,19 +34,22 @@ class DevicePanelState extends State<DevicePanel> {
 
   late PageController _controller;
 
-  late bool _panelHero;
-  bool _transition = false;
+  late int _heroState; // 0 = icon; 1 == none; 2 == panel
+  late int _heroStateGoal;
+
+  Completer _completer = Completer();
 
   @override
   void initState() {
+    _heroState = widget.panelHero ? 2 : 0;
+    _heroStateGoal = widget.panelHero ? 2 : 0;
     _controller =
         PageController(initialPage: widget.device.connectionState.val);
-
-    _panelHero = widget.panelHero;
     WidgetsBinding.instance!
         .addTimingsCallback((timeStamp) => _onBuildFinished());
     theme.system.addEvent("device-update-finished", _onUpdateFinished);
     theme.system.addEvent("update-connection", _onConnectionUpdate);
+    theme.system.addEvent("update-device-animation", _onDeviceAnimationUpdate);
     super.initState();
   }
 
@@ -64,10 +69,25 @@ class DevicePanelState extends State<DevicePanel> {
     }
   }
 
+  void _updateHeroState(bool panel) {
+    if (_heroState == 0 && panel) {
+      _heroStateGoal = 2;
+      setState(() {
+        _heroState = 1;
+      });
+    } else if (_heroState == 2 && !panel) {
+      _heroStateGoal = 0;
+      setState(() {
+        _heroState = 1;
+      });
+    }
+  }
+
   @override
   void dispose() {
     theme.system.removeEvent(_onUpdateFinished);
     theme.system.removeEvent(_onConnectionUpdate);
+    theme.system.removeEvent(_onDeviceAnimationUpdate);
     super.dispose();
   }
 
@@ -93,45 +113,66 @@ class DevicePanelState extends State<DevicePanel> {
   @override
   Widget build(BuildContext context) {
     bool small = theme.isSmall(context);
-    Widget content = Container(
-      height: small ? 120 : 200,
-      width: small ? double.infinity : 200,
-      child: Panel(
-        key: _key,
-        child: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _controller,
-          scrollDirection: Axis.vertical,
-          children: [
-            _getContent(context),
-            LoadingPanel(),
-            NotConnectedPanel(
-              onTap: () {
-                widget.device.connectionState = DeviceConnectionState.unknown;
-                theme.system.call("update-connection", widget.device);
-                theme.server.checkConnection(widget.device);
-              },
-            )
-          ],
+
+    return _wrapWithHero(
+        Container(
+          height: small ? 120 : 200,
+          width: small ? double.infinity : 200,
+          child: Panel(
+            key: _key,
+            child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _controller,
+              scrollDirection: Axis.vertical,
+              children: [
+                _getContent(context),
+                LoadingPanel(),
+                NotConnectedPanel(
+                  device: widget.device,
+                  onTap: () {
+                    widget.device.connectionState =
+                        DeviceConnectionState.unknown;
+                    theme.system.call("update-connection", widget.device);
+                    theme.server.checkConnection(widget.device);
+                  },
+                )
+              ],
+            ),
+          ),
         ),
-      ),
+        _heroState == 2,
+        widget.device);
+  }
+
+  Widget _wrapWithHero(Widget child, bool wrap, Object heroID) {
+    if (!wrap) return child;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (context.findAncestorWidgetOfExactType<Hero>() != null) {
+          print("ERROR: Hero was added twice");
+          return child;
+        }
+
+        try {
+          return Hero(
+              tag: heroID,
+              child: Material(color: Colors.transparent, child: child));
+        } catch (err) {
+          print("ERROR: Hero was added twice (2)");
+          return child;
+        }
+      },
     );
-
-    if (!_panelHero || _transition) return content;
-
-    return Hero(
-        tag: widget.device,
-        child: Material(
-          color: Colors.transparent,
-          child: content,
-        ));
   }
 
   void _onBuildFinished() {
-    if (_transition && mounted)
+    if (_heroState == 1 && mounted) {
       setState(() {
-        _transition = false;
+        _heroState = _heroStateGoal;
       });
+      if (!_completer.isCompleted) _completer.complete();
+      _completer = new Completer();
+    }
   }
 
   GestureDetector _getContent(BuildContext context) {
@@ -199,17 +240,12 @@ class DevicePanelState extends State<DevicePanel> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(20),
-                          child: LayoutBuilder(
-                            builder: (context, constrains) {
-                              if (_panelHero || _transition) {
-                                return icon;
-                              }
-                              return Hero(
-                                tag: widget.device.name + "-icon",
-                                child: Center(child: icon),
-                              );
-                            },
-                          ),
+                          child: _wrapWithHero(
+                              Center(
+                                child: icon,
+                              ),
+                              _heroState == 0,
+                              widget.device.name + "-icon"),
                         ),
                         Expanded(
                             child: Align(
@@ -235,11 +271,8 @@ class DevicePanelState extends State<DevicePanel> {
     );
   }
 
-  void updatePanelHero(bool b) {
-    setState(() {
-      if (b) _transition = true;
-      _panelHero = b;
-    });
+  void _onDeviceAnimationUpdate(bool b) {
+    _updateHeroState(b);
   }
 }
 

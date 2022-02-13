@@ -82,6 +82,15 @@ class Server {
     return 'http://$ip:6917/package';
   }
 
+  Device? getDevice(String id) {
+    for (Room r in rooms) {
+      for (Device d in r.devices) {
+        if (d.id == id) return d;
+      }
+    }
+    return null;
+  }
+
   Future<Map<String, dynamic>> sendRequest(Map<String, dynamic> data) async {
     data["user"] = user.name;
     var body = jsonEncode(data);
@@ -148,5 +157,10 @@ class User {
       "values": {"name": this.name}
     }));
     return data["verified"];
+  }
+
+  @override
+  String toString() {
+    return name;
   }
 }

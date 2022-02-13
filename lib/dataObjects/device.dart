@@ -25,10 +25,10 @@ class Device {
     _updateData();
   }
 
-  void updateStateJson(Map<String, dynamic>? json) {
+  void updateStateJson(Map<String, dynamic>? json, [bool callEvent = true]) {
     this.json["states"] = json;
     _updateData();
-    theme.system.call("device-update-finished", this);
+    if (callEvent) theme.system.call("device-update-finished", this);
   }
 
   void _updateData() {

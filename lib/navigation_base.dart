@@ -24,6 +24,8 @@ class _NavigationBaseState extends State<NavigationBase>
 
   late AnimationController _controller;
 
+  bool _init = true;
+
   @override
   void initState() {
     _controller = new AnimationController(
@@ -38,6 +40,9 @@ class _NavigationBaseState extends State<NavigationBase>
   @override
   Widget build(BuildContext context) {
     bool small = theme.isSmall(context);
+    bool init = _init;
+    _init = false;
+
     return WillPopScope(
       onWillPop: () async {
         setState(() {
@@ -67,7 +72,7 @@ class _NavigationBaseState extends State<NavigationBase>
                             bottomLeft: theme.radius,
                             bottomRight: small ? theme.radius : Radius.zero,
                             topLeft: small ? Radius.zero : theme.radius)),
-                    child: widget.pages[selectedIndex].child),
+                    child: widget.pages[selectedIndex].builder(context, init)),
               ),
             ),
           ],
@@ -174,25 +179,26 @@ class _NavigationBaseState extends State<NavigationBase>
                                       parent: parent, curve: theme.curve)),
                               child: Container(
                                 height: 50,
-                                child: Row(
-                                  children: [
-                                    AnimatedPadding(
-                                      curve: theme.curve,
-                                      duration: Duration(milliseconds: 100),
-                                      padding: EdgeInsets.only(
-                                          left: (selected ? 15 : 10),
-                                          right: 10),
-                                      child: Icon(
-                                        page.icon,
-                                        size: 30,
-                                        color: theme.foregroundColor
-                                            .withOpacity(selected ? 1 : .5),
+                                child: BouncyGestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: () =>
+                                      setState(() => selectedIndex = index),
+                                  child: Row(
+                                    children: [
+                                      AnimatedPadding(
+                                        curve: theme.curve,
+                                        duration: Duration(milliseconds: 100),
+                                        padding: EdgeInsets.only(
+                                            left: (selected ? 15 : 10),
+                                            right: 10),
+                                        child: Icon(
+                                          page.icon,
+                                          size: 30,
+                                          color: theme.foregroundColor
+                                              .withOpacity(selected ? 1 : .5),
+                                        ),
                                       ),
-                                    ),
-                                    BouncyGestureDetector(
-                                      onTap: () =>
-                                          setState(() => selectedIndex = index),
-                                      child: Text(
+                                      Text(
                                         page.text,
                                         style: TextStyle(
                                             color: theme.foregroundColor
@@ -201,9 +207,9 @@ class _NavigationBaseState extends State<NavigationBase>
                                             fontWeight: selected
                                                 ? FontWeight.normal
                                                 : FontWeight.w300),
-                                      ),
-                                    )
-                                  ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ));
                         });
@@ -220,9 +226,9 @@ class _NavigationBaseState extends State<NavigationBase>
 class NavigationEntry {
   final String text;
   final IconData icon;
-  final Widget child;
+  final Function(BuildContext contet, bool init) builder;
   final bool newPage;
 
-  const NavigationEntry(this.text, this.icon, this.child,
+  const NavigationEntry(this.text, this.icon, this.builder,
       {this.newPage = false});
 }

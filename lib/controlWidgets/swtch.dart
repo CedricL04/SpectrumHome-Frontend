@@ -14,6 +14,7 @@ class ToggleSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color def = theme.elevation2.withOpacity(.5);
+
     return BouncyGestureDetector(
       disableAnimationForClick: true,
       onTap: () => onChange(!state),

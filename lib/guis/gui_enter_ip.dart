@@ -35,18 +35,19 @@ class _GuiEnterIpState extends State<GuiEnterIp> {
                 future: theme.server
                     .loadDeviceData(ipController.text, userController.text),
                 callback: (dynamic value) {
-                  Future.delayed(Duration(milliseconds: 300)).then((v) {
-                    if (value)
-                      Navigator.pushReplacement(
-                          context,
-                          HeroDialogRoute(
-                              transparent: false,
-                              builder: (context) => theme.MainScreen()));
-                  });
+                  Navigator.pushReplacement(
+                      context,
+                      HeroDialogRoute(
+                          transparent: false,
+                          builder: (context) => theme.MainScreen()));
                 },
               );
             },
             transparent: true));
+  }
+
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   final TextEditingController ipController = new TextEditingController();

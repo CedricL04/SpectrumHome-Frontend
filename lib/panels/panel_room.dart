@@ -93,16 +93,22 @@ class _RoomPanelState extends State<RoomPanel> {
                   builder: (context) {
                     return NavigationBase(
                       pages: [
-                        NavigationEntry("Devices", Icons.devices_other_outlined,
-                            HomePage(small, widget.room)),
+                        NavigationEntry(
+                            "Devices",
+                            Icons.devices_other_outlined,
+                            (contet, init) =>
+                                HomePage(init, small, widget.room)),
                         NavigationEntry(
                             "Snapshots",
                             Icons.chair_outlined,
-                            ScenePage(
-                              room: widget.room,
-                            )),
+                            (contet, init) => ScenePage(
+                                  room: widget.room,
+                                )),
                         NavigationEntry(
-                            "Statistics", Icons.graphic_eq, Container())
+                          "Statistics",
+                          Icons.graphic_eq,
+                          (contet, init) => Container(),
+                        )
                       ],
                       popButton: true,
                     );
